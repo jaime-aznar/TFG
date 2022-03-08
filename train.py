@@ -14,7 +14,7 @@ import copy
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = "cpu"
 
-
+data = 2
 
 def train_loop(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
@@ -137,9 +137,15 @@ transform = transforms.Compose([
 
 optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
 
-loss_fn = nn.CrossEntropyLoss()
-
-dataset = m.UTKFace(root_dir ='../UTKFace/', transform = transform, extract=2)
+if data == 2:
+    print('updating class weights due to dataset imbalance')
+    n0,n1,n2,n3,n4 = 10078, 4526, 3434,3975, 1692
+    weights = [n0/n0, n0/n1, n0/n2, n0/n3, n0/n4]
+    class_weights = torch.FloatTensor(weights).to(device)
+    loss_fn = nn.CrossEntropyLoss(weight=class_weights)
+else: 
+    loss_fn = nn.CrossEntropyLoss()
+dataset = m.UTKFace(root_dir ='../UTKFace/', transform = transform, extract=data)
 train_split, test_split = m.split_dataset(dataset, val_split=0.1)
 train_dataloader = DataLoader(train_split, batch_size=32, shuffle=True)
 test_dataloader = DataLoader(test_split, batch_size=32, shuffle=False)
