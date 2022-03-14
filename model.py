@@ -1,15 +1,10 @@
-import torch
-import torchvision
-from torchvision import transforms
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import os
 import cv2
 from torch.utils.data import Subset
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 
 
 

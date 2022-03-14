@@ -1,4 +1,6 @@
 from tkinter import N
+
+from sklearn.utils import shuffle
 import model as m
 from torch.utils.data import DataLoader
 import torch
@@ -9,12 +11,73 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 import copy
-
+from sklearn.metrics import confusion_matrix
+#from resources.plotcm import plot_confusion_matrix
+import itertools
+import numpy as np
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = "cpu"
 
-data = 2
+data = 0
+
+def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues, test_accuracy = None):
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title + ' - Model Test Accuracy = ' + str(round(test_accuracy, 3)))
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt), horizontalalignment="center", color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.show()
+
+
+@torch.no_grad()
+def get_all_preds(model, loader):
+    all_preds = torch.tensor([])
+    all_preds = all_preds.to(device)
+    all_labels = torch.tensor([])
+    all_labels = all_labels.to(device)
+    for batch in loader:
+        images, labels = batch
+        images = images.to(device)
+        labels = labels.to(device)
+        preds = model(images)
+        all_preds = torch.cat(
+            (all_preds, preds)
+            ,dim=0
+        )
+        all_labels = torch.cat((all_labels, labels),
+            dim = 0)
+
+    return all_preds, all_labels
+
+def print_confussion_matrix(model, data, acc):
+    conf = DataLoader(data, batch_size=128)
+    preds, labels = get_all_preds(model, conf)
+    preds = preds.to('cpu')
+    labels = labels.to('cpu')
+    cm = confusion_matrix(labels, preds.argmax(dim=1))
+    
+    #plot_confusion_matrix(cm, classes=['Hispanic','Black','Asian','Indian','Other'], test_accuracy = acc)
+    plot_confusion_matrix(cm, classes=['[2-18]', '[18-30]', '[30-45]', '[45-60]', '[60-90]'], test_accuracy = acc)
+
 
 def train_loop(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
@@ -27,7 +90,6 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         y = y.to(device)
 
         pred = model(X)
-        #print('uy')
         loss = loss_fn(pred, y)
         # Backpropagation
         optimizer.zero_grad()
@@ -92,6 +154,7 @@ def train(epochs, model, train_split, test_split, loss_fn, optimizer):
                 print(f'EARLY STOPPED to prevent overfitting, best loss: {best_loss}')
                 break
         print(f'\n\n\nBest accuracy so far: {best_accuracy}\n\n\n')
+        
 
     return best_model, best_accuracy
 
@@ -176,3 +239,5 @@ print(f'trainable: {cont}')
 
 best_model, accuracy = train(epochs, model, train_dataloader, test_dataloader, loss_fn, optimizer)
 
+
+print_confussion_matrix(best_model, dataset, accuracy)
