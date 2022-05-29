@@ -28,7 +28,6 @@ def print_confussion_matrix(model, data):
     cm = confusion_matrix(labels[2], preds[2].argmax(dim=1))
 
     plot_confusion_matrix(cm, classes=['No Hat','Hat'], char = 'hat.png')
-    #plot_confusion_matrix(cm, classes=['[2-18]', '[18-30]', '[30-45]', '[45-60]', '[60-90]'], test_accuracy = acc)
 
 
 

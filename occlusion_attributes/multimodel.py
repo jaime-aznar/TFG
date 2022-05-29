@@ -1,7 +1,5 @@
 import pretrainedmodels
 import torch.nn as nn
-import cv2
-from torchvision import transforms
 import torch
 from torch.nn import functional as F
 import copy
@@ -32,14 +30,17 @@ class MultiCNN(nn.Module):
             if cont == params:
                 break   
 
+    #override forward function to return three predictions
     def forward(self, x):
         bs, _, _, _ = x.shape
+        #execute model until output layers
         x = self.model.features(x)
         x = F.adaptive_avg_pool2d(x, 1).reshape(bs, -1)
         label_eyeglasses = self.fc1(x)
         label_beard = self.fc2(x)
         label_hat = self.fc3(x)
-        return{'label_eyeglasses': label_eyeglasses, 'label_beard': label_beard, 'label_hat': label_hat}
+        #return 3 predictions
+        return{'label_eyeglasses': label_eyeglasses, 'label_beard': label_beard, 'label_hat': label_hat} 
 
 
 

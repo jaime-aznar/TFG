@@ -97,6 +97,3 @@ class VggFace2(Dataset):
 
         return img, self.samples[idx][1]
 
-dataset = VggFace2(path = '../../datasets/VGG-Face2/', csvfile = '../../datasets/MAAD_Face.csv', extract= 'warra')
-
-print(f'{dataset.n0}\n{dataset.n1}\n{dataset.n2}')

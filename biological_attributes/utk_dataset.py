@@ -3,13 +3,11 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 import os
 import cv2
-from torch.utils.data import Subset
-from sklearn.model_selection import train_test_split
 
 
 
 
-#Replicado AlexNET
+#Replicado AlexNET - NO USADO
 class TModel(nn.Module):
 
     def __init__(self):
@@ -117,7 +115,7 @@ class UTKFace(Dataset):
                         n3 += 1
                     elif race == 4:
                         n4 += 1
-                    if race == 4:
+                    if race == 4: #skip Others class
                         continue
                     else:
                         X.append((img, race))
@@ -158,25 +156,7 @@ class UTKFace(Dataset):
         return sample, self.samples[idx][1]
 
     
-def split_dataset(dataset, val_split=0.25):
-    train_index, val_index = train_test_split(list(range(len(dataset))), test_size= val_split)
-    datasets = {}
-    datasets['train'] = Subset(dataset, train_index)
-    datasets['test'] = Subset(dataset, val_index)
-    return datasets['train'], datasets['test']
 
-
-"""
-import matplotlib.pyplot as plt
-tags = ['Hispanic', 'Black', 'Asian', 'Indian', 'Others']
-number = [10078, 4526, 3434, 3975, 1692]
-plt.bar(tags, number, color=['midnightblue', 'orange'])
-plt.title('Distribución Raza - UTKFace')
-plt.xlabel('Razas')
-plt.ylabel('Número de muestras')
-plt.show()
-
-"""
 
 
 

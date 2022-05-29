@@ -1,14 +1,11 @@
 import csv
 from logging.config import fileConfig
-import tarfile
 from torch.utils.data import Dataset
 import os
 from fnmatch import fnmatch
 import cv2
-from torchvision import transforms
 from random import randint
 from random import seed
-import matplotlib.pyplot as plt
 import torch
 
 class VggFace2(Dataset):
@@ -54,6 +51,7 @@ class VggFace2(Dataset):
                     self.hat += 1
                 else:
                     hat = 0
+                #if theres not occlusions in sample --> SKIP
                 if hat == 0 and eyeglasses == 0 and beard == 0:
                     pass
                 else:
@@ -73,8 +71,7 @@ class VggFace2(Dataset):
 
         if self.transform != None:
             img = self.transform(img)
-            #samples = torch.tensor(self.samples[idx][1])            
-
+           
         return img, torch.tensor(self.samples[idx][1][0]), torch.tensor(self.samples[idx][1][1]), torch.tensor(self.samples[idx][1][2])
 
 

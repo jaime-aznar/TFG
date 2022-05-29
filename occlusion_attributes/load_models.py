@@ -23,7 +23,5 @@ model.to('cuda')
 
 model.load_state_dict(torch.load('best_3occ_model.pth'))
 
-print('\n\n\n\n\n')
-
 m.print_confussion_matrix(model, dataset)
 #m.f1_score(model, dataset, target_names= ['Male', 'Female'])
